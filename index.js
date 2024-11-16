@@ -1,37 +1,53 @@
-const express = require("express")
-const mongoose = require("mongoose")
-const cors = require("cors")
-const EmployeeModel = require("./model/Employee")
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const EmployeeModel = require("./model/Employee");
 
-const app = express()
-app.use(express.json())
-app.use(cors())
+const app = express();
 
-mongoose.connect("mongodb://127.0.0.1:27017/employee");
+// Middleware
+app.use(express.json());
+app.use(cors());
 
+// MongoDB Atlas URI with your username and password directly
+const uri = "mongodb+srv://suriyagunasekaran2002:yqpATOF7PHoeScSJ@cluster.1i07b.mongodb.net/employee?retryWrites=true&w=majority";
+
+// Connect to MongoDB Atlas
+mongoose.connect(uri)
+  .then(() => console.log("MongoDB Connected"))
+  .catch(err => console.error("Error connecting to MongoDB: ", err));
+
+// Routes
 app.post("/login", (req, res) => {
-    const {email, password} = req.body;
-    EmployeeModel.findOne({email : email})
-    .then(user => {
-        if(user) {
-            if(user.password === password){
-                res.json("Success")
-            }else{
-                res.json("The password is incorrect")
+    const { email, password } = req.body;
+
+    // Find the employee by email
+    EmployeeModel.findOne({ email: email })
+        .then(user => {
+            if (user) {
+                if (user.password === password) {
+                    res.json("Success");
+                } else {
+                    res.json("The password is incorrect");
+                }
+            } else {
+                res.json("No record found");
             }
-        }else{
-            res.json("No record existed")
-        }
-    })
-})
+        })
+        .catch(err => res.json("Error: " + err));
+});
 
 app.post("/register", (req, res) => {
-    EmployeeModel.create(req.body)
-    .then(employees => res.json(employees))
-    .catch(err => res.json(err))
-})
+    const newEmployee = new EmployeeModel(req.body);
+    
+    // Save new employee to the database
+    newEmployee.save()
+        .then(employee => res.json(employee))
+        .catch(err => res.json("Error: " + err));
+});
 
-
-app.listen(3001, () => {
-    console.log("server is running")
-})
+// Start the server
+const port = process.env.PORT || 3001;
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
