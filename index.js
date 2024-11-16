@@ -1,3 +1,6 @@
+// Load environment variables from the .env file
+require('dotenv').config();
+
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -6,10 +9,10 @@ const EmployeeModel = require("./model/Employee");
 const app = express();
 
 // Middleware
-app.use(express.json());
-app.use(cors());
+app.use(express.json());  // Parses incoming JSON data
+app.use(cors());  // Enable CORS for all domains (you can specify domains if needed)
 
-// MongoDB Atlas URI with your username and password directly
+// MongoDB Atlas URI from environment variables or fallback to the hardcoded string
 const uri = process.env.MONGO_URI || "mongodb+srv://suriyagunasekaran2002:yqpATOF7PHoeScSJ@cluster.1i07b.mongodb.net/employee?retryWrites=true&w=majority";
 
 // Connect to MongoDB Atlas
@@ -18,6 +21,7 @@ mongoose.connect(uri)
   .catch(err => console.error("Error connecting to MongoDB: ", err));
 
 // Routes
+// Login Route
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
 
@@ -37,6 +41,7 @@ app.post("/login", (req, res) => {
         .catch(err => res.json("Error: " + err));
 });
 
+// Register Route
 app.post("/register", (req, res) => {
     const newEmployee = new EmployeeModel(req.body);
     
