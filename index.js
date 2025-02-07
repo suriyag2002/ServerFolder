@@ -1,57 +1,38 @@
-// Load environment variables from the .env file
 require('dotenv').config();
 
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const EmployeeModel = require("./model/Employee");
 
 const app = express();
 
-// Middleware
-app.use(express.json());  // Parses incoming JSON data
-app.use(cors());  // Enable CORS for all domains (you can specify domains if needed)
+app.use(express.json());
+app.use(cors());
 
-// MongoDB Atlas URI from environment variables or fallback to the hardcoded string
-const uri = process.env.MONGO_URI || "mongodb+srv://suriyagunasekaran2002:yqpATOF7PHoeScSJ@cluster.1i07b.mongodb.net/employee?retryWrites=true&w=majority";
+const uri = process.env.MONGO_URI || "mongodb+srv://suriyagunasekaran2002:suriyagunasekaran2002@cluster.1i07b.mongodb.net/studentdb?retryWrites=true&w=majority";
 
-// Connect to MongoDB Atlas
 mongoose.connect(uri)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.error("Error connecting to MongoDB: ", err));
 
-// Routes
-// Login Route
 app.post("/login", (req, res) => {
     const { email, password } = req.body;
-
-    // Find the employee by email
-    EmployeeModel.findOne({ email: email })
-        .then(user => {
-            if (user) {
-                if (user.password === password) {
-                    res.json("Success");
-                } else {
-                    res.json("The password is incorrect");
-                }
-            } else {
-                res.json("No record found");
-            }
-        })
-        .catch(err => res.json("Error: " + err));
+    res.json("Success");
 });
 
-// Register Route
-app.post("/register", (req, res) => {
-    const newEmployee = new EmployeeModel(req.body);
+// Example of a POST route for registration
+app.post('/register', (req, res) => {
+    const { name, email, password } = req.body;
+    // Here, you should handle the registration logic (e.g., save to MongoDB)
     
-    // Save new employee to the database
-    newEmployee.save()
-        .then(employee => res.json(employee))
-        .catch(err => res.json("Error: " + err));
+    // Example response (you can replace this with actual registration logic)
+    if (name && email && password) {
+        return res.json({ message: "User registered successfully" });
+    } else {
+        return res.status(400).json({ message: "Missing required fields" });
+    }
 });
 
-// Start the server
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
